@@ -7,7 +7,12 @@ y' = (y*z')/z
 calule x', y' coordinate point cooresponding to the points on the screen:
 (x', y') = (K1*x/z, K1*y/z)
 
-draw the donut:
-(x, y, z) = (R2, 0, 0) + (R1cos(tta), R1sin(tta), 0)
+draw the donut profile (circle), rotation from 0 to 2PI:
+(x, y, z) = (R2, 0, 0) + (R1cos(θ), R1sin(θ), 0)
+
+spin the donut around x, y, z axis
+x = (R2 + R1cosθ)(cosBcosϕ + sinAsinBsinϕ) − R1cosAsinBsinθ
+y = (R2 + R1cosθ)(cosϕsinB − cosBsinAsinϕ) + R1cosAcosBsinθ
+z = cosA(R2 + R1cosθ)sinϕ + R1sinAsinθ
 
 
