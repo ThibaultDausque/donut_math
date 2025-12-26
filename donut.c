@@ -1,4 +1,9 @@
-#include "donut.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
+# define PI 3.14159265358979323846
 
 const float theta_spacing = 0.07;
 const float phi_spacing   = 0.02;
@@ -7,47 +12,18 @@ const float	R1 = 1;
 const float	R2 = 2;
 const float	K2 = 5;
 
-const int	width = 100;
-const int	height = 100;
+const int	width = 50;
+const int	height = 50;
 
-int	free_tab(char **tab)
+const float	K1 = (width*K2*3)/(8*(R1+R2));
+int	ft_donut(float A, float B)
 {
-	int		i = 0;
+	char	output[height][width];
+	float	zbuffer[height][width];
+	char	*luminance = ".,-~:;=!*#$@";
 
-	if (!tab)
-		return 0;
-	while (tab[i])
-		free(tab[i++]);
-	free(tab);
-	return 1;
-}
-
-const float	K1 = (width*K2*3)/(8*(R1 + R2));
-int	ft_donut()
-{
-	int		i = 0;
-	int		j = 0;
-	char	**output;
-
-	output = (char**)malloc((height + 1) * sizeof(char*));
-	if (!output)
-		return 0;
-	while (i < height)
-	{
-		j = 0;
-		output[i] = (char*)malloc((width + 1) * sizeof(char));
-		if (!output)
-			return 0;
-		while (j < width)
-		{
-			output[i][j] = ' ';
-			j++;
-		}
-		output[i][j] = '\0';
-		i++;
-	}
-	output[i] = NULL;
-
+	memset(output, ' ', sizeof(output));
+	memset(zbuffer, 0, sizeof(zbuffer));
 	for (float theta = 0; theta < 2*M_PI; theta += theta_spacing)
 	{
 		float	costheta = cos(theta);
@@ -56,31 +32,47 @@ int	ft_donut()
 		{
 			float	cosphi = cos(phi);
 			float	sinphi = sin(phi);
-			float	x = (R2 + R1 * costheta) * cosphi;
-			float	y = R1 * sintheta;
-			float	z = -(R2 + R1 * costheta) * sinphi;
-			printf("x: %f, y: %f, z: %f\n", x, y, z);
-			float	ozz = 1 / z;
-
-			int		xp = (int) ((width / 2) + );
-			int		yp = (int) (((height / 2) * y) / z);
-			printf("xp: %d, yp: %d\n", xp, yp);
-			output[yp][xp] = '.';
+			
+			float	x = (R2 + R1*costheta)*(cos(B)*cosphi + sin(A)*sin(B)*sinphi) - R1*cos(A)*sin(B)*sintheta;
+			float	y = (R2 + R1 * costheta)*(cosphi*sin(B) - cos(B)*sin(A)*sinphi) + R1*cos(A)*cos(B)*sintheta;
+			float	z = K2 + cos(A)*(R2 + R1*costheta)*sinphi + R1*sin(A)*sintheta;
+			float	ooz = 1/z;
+			int		xp = (int) (width/2 + K1*ooz*x);
+			int		yp = (int) (height/2 - (K1*0.5)*ooz*y);
+			
+			float	L = cosphi*costheta*sin(B) - cos(A)*costheta*sinphi - sin(A)*sintheta + cos(B)*(cos(A)*sintheta - costheta*sin(A)*sinphi);
+			if (L > 0)
+			{
+				if (ooz > zbuffer[yp][xp])
+				{
+					zbuffer[yp][xp] = ooz;
+					int		lum_idx = L * 8;
+					output[yp][xp] = luminance[lum_idx];
+				}
+			}
 		}
 	}
-	for(int	i = 0; i < height; i++)
+	printf("\x1b[2J\x1b[H");
+	for(int i = 0; i < height; i++)
 	{
 		for(int j = 0; j < width; j++)
 		{
-			printf("%c", output[i][j]);
+			putchar(output[i][j]);
 		}
-		printf("\n");
+		putchar('\n');
 	}
 	return 1;
 }
 
 int	main(void)
 {
-	ft_donut();
+	float	A = 0;
+	float	B = 0;
+	while (1)
+	{
+		ft_donut(A, B);
+		A += 0.004;
+		B += 0.005;
+	}
 	return 0;
 }
